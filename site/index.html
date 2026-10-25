@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cncp 插件聚合仓库</title>
+<meta name="description" content="给 Cncp 客户端用的插件列表：第三方插件按 modules/ 目录提交 PR，通过校验后自动出现在这里。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Cncp 插件聚合仓库</h1>
+    <p class="sub">
+      这里收录社区提交的 Cncp 插件。每个插件都是 <code>modules/&lt;id&gt;/module.json</code> 里的一份清单，
+      通过校验合并进 main 后自动出现在下面的列表里。
+    </p>
+    <div class="meta" id="meta">正在读取索引…</div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="搜索名称、id、作者、描述…" autocomplete="off">
+      <select id="cat">
+        <option value="">全部分类</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="list" class="grid"></div>
+  <p id="empty" class="empty" hidden>没有匹配的插件。</p>
+</main>
+
+<footer class="wrap foot">
+  <p>
+    客户端源地址：<code id="source-url">正在读取…</code>
+    <button id="copy" class="ghost" type="button">复制</button>
+  </p>
+  <p class="muted">
+    提交方式见 <a href="https://github.com/Char0n111/cncp-plugin-repo/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>。
+    官方示例插件在 <a href="https://github.com/Char0n111/cncp-plugins">cncp-plugins</a>。
+  </p>
+</footer>
+
+<script>
+(function () {
+  const listEl = document.getElementById('list');
+  const emptyEl = document.getElementById('empty');
+  const metaEl = document.getElementById('meta');
+  const qEl = document.getElementById('q');
+  const catEl = document.getElementById('cat');
+
+  let all = [];
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+
+  function render() {
+    const q = qEl.value.trim().toLowerCase();
+    const cat = catEl.value;
+    const shown = all.filter((m) => {
+      if (cat && !(m.categories || []).includes(cat)) return false;
+      if (!q) return true;
+      const hay = [m.id, m.name, m.author, m.description, (m.categories || []).join(' '), (m.capabilities || []).join(' ')]
+        .join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+
+    listEl.innerHTML = shown.map((m) => {
+      const cats = (m.categories || []).map((c) => `<span class="tag">${esc(c)}</span>`).join('');
+      const caps = (m.capabilities || []).map((c) => `<span class="tag cap">${esc(c)}</span>`).join('');
+      const src = m.source ? `<a class="link" href="${esc(m.source)}" rel="noopener">源码</a>` : '';
+      const home = m.homepage ? `<a class="link" href="${esc(m.homepage)}" rel="noopener">主页</a>` : '';
+      return `
+        <article class="card">
+          <div class="card-head">
+            <h2>${esc(m.name)}</h2>
+            <span class="ver">v${esc(m.version)}</span>
+          </div>
+          <div class="id-line"><code>${esc(m.id)}</code></div>
+          <p class="desc">${esc(m.description)}</p>
+          <div class="tags">${cats}${caps}</div>
+          <div class="card-foot">
+            <span class="author">${esc(m.author)}</span>
+            <span class="links">
+              ${home}${src}
+              <a class="dl" href="${esc(m.download)}" rel="noopener">下载 .zip</a>
+            </span>
+          </div>
+          <div class="hash" title="sha256">${esc(m.sha256)}</div>
+        </article>`;
+    }).join('');
+
+    emptyEl.hidden = shown.length !== 0;
+  }
+
+  function fillCategories() {
+    const set = new Set();
+    for (const m of all) for (const c of m.categories || []) set.add(c);
+    for (const c of [...set].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))) {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      catEl.appendChild(opt);
+    }
+  }
+
+  fetch('index.json', { cache: 'no-store' })
+    .then((r) => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then((data) => {
+      all = Array.isArray(data.modules) ? data.modules : [];
+      all.sort((a, b) => String(a.name).localeCompare(String(b.name), 'zh-Hans-CN'));
+      metaEl.textContent = `${all.length} 个插件 · 更新于 ${data.updated || '未知'}`;
+      document.getElementById('source-url').textContent = location.origin + location.pathname.replace(/[^/]*$/, '') + 'cncp-source.json';
+      fillCategories();
+      render();
+    })
+    .catch((e) => {
+      metaEl.textContent = '索引读取失败：' + e.message;
+      listEl.innerHTML = '';
+      emptyEl.hidden = false;
+      emptyEl.textContent = '读不到 index.json。如果你是本地打开这个文件，请先跑一次 scripts/build-index.mjs，并用 http 服务访问（file:// 下 fetch 会被浏览器拦住）。';
+    });
+
+  qEl.addEventListener('input', render);
+  catEl.addEventListener('change', render);
+
+  document.getElementById('copy').addEventListener('click', async () => {
+    const text = document.getElementById('source-url').textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      document.getElementById('copy').textContent = '已复制';
+    } catch {
+      document.getElementById('copy').textContent = '复制失败';
+    }
+    setTimeout(() => { document.getElementById('copy').textContent = '复制'; }, 1500);
+  });
+})();
+</script>
+</body>
+</html>

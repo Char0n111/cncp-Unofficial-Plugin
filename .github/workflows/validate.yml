@@ -1,0 +1,25 @@
+name: 校验插件清单
+
+on:
+  pull_request:
+    paths:
+      - 'modules/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 逐条校验 modules/*/module.json
+        run: node scripts/validate.mjs
+
+      - name: 试生成索引（不提交，只验证能跑通）
+        run: node scripts/build-index.mjs --plugins-base https://example.invalid/packages

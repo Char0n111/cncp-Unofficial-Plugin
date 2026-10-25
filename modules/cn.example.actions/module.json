@@ -1,0 +1,15 @@
+{
+  "id": "cn.example.actions",
+  "name": "示例功能插件",
+  "version": "1.0.0",
+  "description": "演示怎么给客户端加自己的功能按钮",
+  "author": "Cncp",
+  "homepage": "https://clash.cupzz.cn/docs/plugins",
+  "source": "https://github.com/Char0n111/cncp-plugins/tree/main/examples/cn.example.actions",
+  "license": "MIT",
+  "categories": ["示例"],
+  "capabilities": ["actions", "hooks", "tasks"],
+  "minHostVersion": "1.3.18",
+  "downloadPath": "packages/cn.example.actions-1.0.0.zip",
+  "sha256": "b16744ab7ce31deb26a3fb9eec8e2d4790dbdfe36847be96104355029e947097"
+}

@@ -1,0 +1,56 @@
+name: 生成索引并发布
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 校验
+        run: node scripts/validate.mjs
+
+      # PLUGINS_BASE 在仓库 Settings → Secrets and variables → Actions → Variables
+      # 里配一次即可，例如 https://raw.githubusercontent.com/你/cncp-plugins/main
+      - name: 生成 index.json / cncp-source.json
+        run: node scripts/build-index.mjs
+        env:
+          PLUGINS_BASE: ${{ vars.PLUGINS_BASE }}
+
+      - name: 组装站点（站点文件 + 两份索引）
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          cp index.json cncp-source.json _site/
+          ls -la _site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

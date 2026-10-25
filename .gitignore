@@ -1,0 +1,11 @@
+# 构建产物
+_site/
+node_modules/
+
+# 系统/junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 索引是生成物，但要提交 —— 这样没有 CI 的自托管也能直接用。
+# 改动 modules/ 之后记得重新跑：node scripts/build-index.mjs
