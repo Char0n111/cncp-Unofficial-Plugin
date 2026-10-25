@@ -11,6 +11,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const modulesDir = join(root, 'modules');
@@ -18,6 +19,8 @@ const modulesDir = join(root, 'modules');
 const ID_RE = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 const VERSION_RE = /^\d+\.\d+\.\d+$/;
 const SHA_RE = /^[0-9a-f]{64}$/;
+
+const sha256Hex = (buf) => createHash('sha256').update(buf).digest('hex');
 
 const errors = [];
 const warnings = [];
@@ -95,16 +98,54 @@ for (const dirName of entries) {
   needString(m, 'description', file, { max: 300 });
   needString(m, 'author', file, { max: 60 });
 
+  // downloadPath 有两种合法形态：
+  //   modules/<id>/<id>-<version>.zip  → 包在本仓库里（第三方插件的标准做法，一键上传生成的就是它）
+  //   packages/<文件名>.zip             → 包在官方仓库 cncp-plugins（只有官方示例这样放）
   const dl = needString(m, 'downloadPath', file, { max: 300 });
+  const dlAbs = typeof m.downloadUrl === 'string' && /^https:\/\//.test(m.downloadUrl) ? m.downloadUrl : null;
+  let localZip = null;
   if (dl) {
-    if (!/^packages\/[^/]+\.zip$/.test(dl)) err(file, `downloadPath 必须形如 packages/<文件名>.zip：${dl}`);
-    if (id && version && dl !== `packages/${id}-${version}.zip`) {
+    if (dlAbs) {
+      warn(file, `同时给了 downloadUrl（${dlAbs}），客户端会用它下载`);
+    } else if (dl.startsWith('modules/')) {
+      if (id && version) {
+        if (dl !== `modules/${id}/${id}-${version}.zip`) {
+          err(file, `downloadPath 必须是 modules/${id}/${id}-${version}.zip：${dl}`);
+        } else {
+          localZip = dl;
+        }
+      }
+    } else if (!/^packages\/[^/]+\.zip$/.test(dl)) {
+      err(
+        file,
+        `downloadPath 要么是 modules/<id>/<id>-<version>.zip（包在本仓库），` +
+          `要么是 packages/<文件名>.zip（包在官方仓库）：${dl}`,
+      );
+    } else if (id && version && dl !== `packages/${id}-${version}.zip`) {
       err(file, `downloadPath 必须叫 packages/${id}-${version}.zip：${dl}`);
     }
   }
 
   const sha = needString(m, 'sha256', file, { max: 64 });
-  if (sha && !SHA_RE.test(sha)) err(file, `sha256 必须是 64 位小写十六进制：${sha}`);
+  const shaOk = !!sha && SHA_RE.test(sha);
+  if (sha && !shaOk) err(file, `sha256 必须是 64 位小写十六进制：${sha}`);
+
+  // 包在本仓库时，必须真的存在、真的对得上 —— 这是「一键上传」之外的第二道闸门：
+  // 手工改 zip 忘了同步 sha256，客户端会拒装，这种错必须在 PR 阶段就拦住。
+  if (localZip) {
+    let buf = null;
+    try {
+      buf = await readFile(join(root, localZip));
+    } catch {
+      err(file, `downloadPath 指向的文件不存在：${localZip}（用 node scripts/upload-plugin.mjs 生成）`);
+    }
+    if (buf) {
+      if (buf.length === 0) err(file, `${localZip} 是个空文件`);
+      if (shaOk && sha256Hex(buf) !== sha) {
+        err(file, `sha256 和 ${localZip} 的实际内容对不上（清单写的 ${sha}，实际 ${sha256Hex(buf)}）`);
+      }
+    }
+  }
 
   if (!Array.isArray(m.capabilities) || m.capabilities.length === 0) {
     err(file, 'capabilities 必须是非空数组');
@@ -117,7 +158,7 @@ for (const dirName of entries) {
   }
 
   for (const key of ['homepage', 'source']) {
-    if (m[key] === undefined) continue;
+    if (m[key] === undefined || m[key] === '') continue;
     if (!/^https:\/\//.test(String(m[key]))) {
       if (key === 'homepage') err(file, 'homepage 必须是 https 地址');
       else warn(file, 'source 建议写 https 地址');

@@ -53,6 +53,35 @@ if (!/^https?:\/\//.test(pluginsBase)) {
   console.warn('');
 }
 
+/**
+ * 本仓库自己的前缀：`downloadPath` 以 `modules/` 开头的插件，包就放在本仓库里
+ * （第三方开发者的标准做法，`scripts/upload-plugin.mjs` 生成的就是这种）。
+ * 默认同样走 ghproxy —— 客户端下载不下来等于没上传。
+ */
+const selfRepo = process.env.SELF_REPO || 'Char0n111/cncp-Unofficial-Plugin';
+const selfBase = (
+  argValue('--self-base') ||
+  process.env.SELF_BASE ||
+  `https://ghproxy.net/https://raw.githubusercontent.com/${selfRepo}/main`
+).replace(/\/+$/, '');
+
+/**
+ * downloadPath / downloadUrl → 客户端能直接下载的绝对地址。
+ *
+ *   · `downloadUrl` 给了绝对地址        → 用它
+ *   · `downloadPath` 本身就是 http(s)   → 用它
+ *   · `downloadPath` 以 `modules/` 开头 → 包在本仓库，拼 selfBase
+ *   · 其它（`packages/x.zip`）          → 包在官方仓库 cncp-plugins，拼 pluginsBase
+ */
+function resolveDownload(m) {
+  const p = String(m.downloadUrl ?? m.downloadPath ?? '')
+    .trim()
+    .replace(/^\/+/, '');
+  if (/^https?:\/\//.test(p)) return p;
+  if (p.startsWith('modules/')) return `${selfBase}/${p}`;
+  return `${pluginsBase}/${p}`;
+}
+
 const dirs = (await readdir(modulesDir, { withFileTypes: true }))
   .filter((d) => d.isDirectory())
   .map((d) => d.name)
@@ -68,9 +97,7 @@ for (const dirName of dirs) {
     continue;
   }
 
-  const download = /^https?:\/\//.test(m.downloadPath)
-    ? m.downloadPath
-    : `${pluginsBase}/${String(m.downloadPath).replace(/^\/+/, '')}`;
+  const download = resolveDownload(m);
 
   modules.push({
     id: m.id,
@@ -125,5 +152,6 @@ await write('index.json', repoIndex);
 await write('cncp-source.json', clientSource);
 
 console.log(`已生成 index.json / cncp-source.json：${modules.length} 个插件`);
-console.log(`下载前缀：${pluginsBase}`);
+console.log(`官方仓库包前缀：${pluginsBase}`);
+console.log(`本仓库包前缀：${selfBase}`);
 for (const m of modules) console.log(`  · ${m.id}@${m.version}  ${m.name}`);
