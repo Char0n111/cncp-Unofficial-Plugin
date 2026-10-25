@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "name": "Cncp 插件聚合仓库",
+  "name": "Cncp 第三方插件仓库",
   "updated": "2026-10-25",
   "count": 4,
   "modules": [
@@ -22,7 +22,7 @@
         "hooks"
       ],
       "minHostVersion": "1.3.18",
-      "download": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.probe-1.0.0.zip",
+      "download": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.probe-1.0.0.zip",
       "sha256": "f49dac76d0baf5206dca29413c75631aed3ceef2434395200457464defdb3721"
     },
     {
@@ -41,7 +41,7 @@
         "speedtester"
       ],
       "minHostVersion": "1.3.18",
-      "download": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.ping-1.0.0.zip",
+      "download": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.ping-1.0.0.zip",
       "sha256": "2a658352eef865e4157b62f9782333ffcf05263c0ca071327f356fde09aa2876"
     },
     {
@@ -62,7 +62,7 @@
         "tasks"
       ],
       "minHostVersion": "1.3.18",
-      "download": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.actions-1.0.0.zip",
+      "download": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.actions-1.0.0.zip",
       "sha256": "b16744ab7ce31deb26a3fb9eec8e2d4790dbdfe36847be96104355029e947097"
     },
     {
@@ -81,7 +81,7 @@
         "hooks"
       ],
       "minHostVersion": "1.3.18",
-      "download": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.hooks-1.0.0.zip",
+      "download": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.hooks-1.0.0.zip",
       "sha256": "404d9f0bd5d9e83a7ed24b4a49f9dba1afc783b3fff1ac0837d06747d421a0f4"
     }
   ]

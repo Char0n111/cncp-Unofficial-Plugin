@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "name": "Cncp 插件聚合仓库",
+  "name": "Cncp 第三方插件仓库",
   "updated": "2026-10-25",
   "plugins": [
     {
@@ -10,7 +10,7 @@
       "description": "报告插件在本机到底能干什么：联网、写文件、碰客户端",
       "author": "Cncp",
       "homepage": "https://clash.cupzz.cn/docs/plugins",
-      "url": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.probe-1.0.0.zip",
+      "url": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.probe-1.0.0.zip",
       "sha256": "f49dac76d0baf5206dca29413c75631aed3ceef2434395200457464defdb3721",
       "capabilities": [
         "actions",
@@ -24,7 +24,7 @@
       "description": "演示协议的最小插件，返回模拟延迟",
       "author": "Cncp",
       "homepage": "https://clash.cupzz.cn/docs/plugins",
-      "url": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.ping-1.0.0.zip",
+      "url": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.ping-1.0.0.zip",
       "sha256": "2a658352eef865e4157b62f9782333ffcf05263c0ca071327f356fde09aa2876",
       "capabilities": [
         "speedtester"
@@ -37,7 +37,7 @@
       "description": "演示怎么给客户端加自己的功能按钮",
       "author": "Cncp",
       "homepage": "https://clash.cupzz.cn/docs/plugins",
-      "url": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.actions-1.0.0.zip",
+      "url": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.actions-1.0.0.zip",
       "sha256": "b16744ab7ce31deb26a3fb9eec8e2d4790dbdfe36847be96104355029e947097",
       "capabilities": [
         "actions",
@@ -52,7 +52,7 @@
       "description": "在连接前/连接后/断开时打一行日志，用来验证安卓端插件引擎",
       "author": "Cncp",
       "homepage": "https://clash.cupzz.cn/docs/plugins",
-      "url": "https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.hooks-1.0.0.zip",
+      "url": "https://ghproxy.net/https://raw.githubusercontent.com/Char0n111/cncp-plugins/main/packages/cn.example.hooks-1.0.0.zip",
       "sha256": "404d9f0bd5d9e83a7ed24b4a49f9dba1afc783b3fff1ac0837d06747d421a0f4",
       "capabilities": [
         "hooks"

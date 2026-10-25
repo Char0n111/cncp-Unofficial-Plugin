@@ -1,12 +1,22 @@
-# Cncp 插件聚合仓库
+# Cncp 第三方插件仓库
 
-类 LSPosed 模块仓库的玩法：**任何人**把自己的 Cncp 插件提一个 PR（`modules/<插件id>/module.json` + 一个能下载的 zip），校验通过后合并，站点和索引自动重建 —— 客户端只要填一次源地址，就能看到全部插件。
+类 LSPosed 模块仓库的玩法：**任何人**把自己的 Cncp 插件提一个 PR（`modules/<插件id>/module.json` + 一个能下载的 zip），自动校验通过后合并，站点和索引自动重建 —— 客户端只要填一次源地址，就能看到这里收录的全部社区插件。
 
-- 站点：`https://<你的用户名>.github.io/cncp-plugin-repo/`
+> **两个仓库的分工（别弄错）**
+>
+> | 仓库 | 是什么 | 能不能第三方上传 |
+> | --- | --- | --- |
+> | [`cncp-plugins`](https://github.com/Char0n111/cncp-plugins) | **官方源**，官方维护的示例/内置插件 | **不能**，只收官方自己发的 |
+> | 本仓库 | **第三方 / 社区源**，谁都能提 PR | **能**，走自动校验，不带人工审核 |
+>
+> 两个源在客户端里是并列的，可以同时用：官方源填官方地址，社区源填本仓库的 `cncp-source.json`。
+> 本仓库**不会**把插件并进官方源 —— 进了官方源才算「官方插件」。
+
+- 站点：`https://<你的用户名>.github.io/cncp-Unofficial-Plugin/`
 - 索引（页面/工具用）：[`index.json`](index.json)
 - 索引（**客户端直接填这个地址**）：`cncp-source.json`
 
-官方示例插件不在这里维护，在 [cncp-plugins](https://github.com/Char0n111/cncp-plugins)。本仓库收录的是社区插件，以及它们的元数据。
+官方示例插件的源码在 [cncp-plugins](https://github.com/Char0n111/cncp-plugins)；本仓库收录的是社区插件，以及它们的元数据。
 
 ## 为什么分两份索引
 
@@ -96,7 +106,7 @@ node scripts/build-index.mjs --plugins-base https://raw.githubusercontent.com/yo
 客户端「插件」页填这个地址即可：
 
 ```
-https://<你的用户名>.github.io/cncp-plugin-repo/cncp-source.json
+https://<你的用户名>.github.io/cncp-Unofficial-Plugin/cncp-source.json
 ```
 
 > 注意：Cncp 安卓客户端目前（1.3.x）只支持「导入本地 zip」。插件源的读取随着 2.0.0 的插件市场一起上 —— 本仓库先按最终格式把数据准备好。
